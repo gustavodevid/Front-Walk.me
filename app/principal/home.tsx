@@ -176,14 +176,11 @@ if (loading) {
                             );
                         }}
                     />
-                    <TouchableOpacity style={styles.verTodosButton}>
-                        <Text style={styles.verTodosText}>Ver Todos</Text>
-                    </TouchableOpacity>
                 </View>
 
         
     {/* Dicas e Artigos */}
-    {/* <View style={styles.section}>
+    <View style={styles.section}>
           <Text style={styles.sectionTitle}>Dicas e Artigos</Text>
           <FlatList
             horizontal
@@ -197,13 +194,13 @@ if (loading) {
               </TouchableOpacity>
             )}
           />
-        </View> */}
-        {/* Widget de Previsão do Tempo
+        </View>
+        {/* Widget de Previsão do Tempo */}
         <View style={styles.weatherWidget}>
           <Ionicons name="partly-sunny-outline" size={32} color="#FF9800" />
           <Text style={styles.weatherTemp}>35°C</Text>
           <Text style={styles.weatherText}>Ensolarado</Text>
-        </View> */}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

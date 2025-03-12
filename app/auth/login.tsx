@@ -20,7 +20,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import SignUpButton from '../components/SignUpButton';
 import LoginButton from '../components/LoginButton';
-import  loginTutor  from '../services/apis/auth/LoginTutor';
+import  loginTutor  from '../services/api/auth/LoginTutor';
 import { storeData } from '../utils/Storage/StoreData';
 
 export default function Login() {
