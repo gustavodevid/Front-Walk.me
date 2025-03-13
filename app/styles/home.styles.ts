@@ -236,6 +236,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
 },
+servicoCard: {
+  backgroundColor: 'white',
+  borderRadius: 10,
+  padding: 20,
+  marginBottom: 15,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 2,
+},
+servicoTitle: {
+  fontSize: 18,
+  fontWeight: 'bold',
+  marginBottom: 10,
+},
+servicoText: {
+  fontSize: 16,
+  marginBottom: 5,
+},
   });
 
   export default styles;

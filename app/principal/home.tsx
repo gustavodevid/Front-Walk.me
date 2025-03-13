@@ -18,13 +18,23 @@ interface Passeador {
   foto?: string | null;
 }
 
+interface Servico {
+  servicoId: number;
+  passeadorId: number;
+  petId: number;
+  data: string; 
+  horario: string;
+  passeador: { nome: string };
+  pet: { nome: string };
+}
+
 export default function Home() {
   const insets = useSafeAreaInsets();
   const [userName, setUserName] = useState<string | null>(null);
   const [passeadores, setPasseadores] = useState<Passeador[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [servicos, setServicos] = useState<Servico[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState(false);
-
   useEffect(() => {
     fetchData();
   }, []);
@@ -79,6 +89,33 @@ export default function Home() {
     }
   };
   
+  const fetchServicos = useCallback(async () => {
+    setLoading(true); 
+    try {
+        const userId = await AsyncStorage.getItem('userId');
+        if (userId) {
+            const response = await axios.get<Servico[]>(`${config.API_URL}/servico/tutor/${userId}`);
+            setServicos(response.data);
+        } else {
+            Alert.alert('Erro', 'Usuário não autenticado.');
+        }
+    } catch (error) {
+        console.error('Erro ao buscar serviços:', error);
+        Alert.alert('Erro', 'Erro ao buscar serviços.');
+    } finally {
+        setLoading(false); 
+    }
+    setRefreshing(false);
+}, []);
+
+const onRefresh = useCallback(() => {
+  setRefreshing(true);
+  fetchServicos();
+}, [fetchServicos]);
+
+useEffect(() => {
+    fetchServicos();
+}, [fetchServicos]);
 
   const dicas = [
     { id: '1', titulo: 'Treinando seu pet', imagem: require('../../assets/images/cao-login.jpg') },
@@ -97,11 +134,6 @@ export default function Home() {
   const handleSearchPress = () => {
     router.push('/passeio/Passeio'); 
 };
-
-const onRefresh = useCallback(() => {
-  setRefreshing(true);
-  fetchData();
-}, []);
 
 if (loading) {
   return (
@@ -131,29 +163,19 @@ if (loading) {
                     <Text style={styles.searchText}>Buscar Passeio</Text>
                 </TouchableOpacity>
         {/* Feed de Atividades */}
-        {/* <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Atividades Recentes</Text>
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={atividades}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.atividadeCard}>
-                <Image style={styles.atividadeImagem} source={item.imagem} />
-                <Text style={styles.atividadeTipo}>{item.tipo}</Text>
-                {item.pet && <Text style={styles.atividadeDetalhe}>Pet: {item.pet}</Text>}
-                {item.passeador && <Text style={styles.atividadeDetalhe}>Passeador: {item.passeador}</Text>}
-                {item.local && <Text style={styles.atividadeDetalhe}>Local: {item.local}</Text>}
-              </View>
-            )}
-          />
-        </View> */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Lembrete</Text>
+          {servicos.map((servico) => (
+                              <View key={servico.servicoId} style={styles.servicoCard}>
+                                  <Text style={styles.servicoTitle}>Passeio </Text>
+                                  <Text style={styles.servicoText}>Você tem um passeio agendado com {servico.passeador.nome} para {servico.pet.nome}.</Text>
+                              </View>
+                          ))}
+        </View>
         
-
          {/* Recomendações de Passeadores */}
          <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Passeadores Próximos</Text>
+                    <Text style={styles.sectionTitle}>Walkers próximos de você</Text>
                     <FlatList
                         horizontal
                         showsHorizontalScrollIndicator={false}
@@ -196,11 +218,11 @@ if (loading) {
           />
         </View>
         {/* Widget de Previsão do Tempo */}
-        <View style={styles.weatherWidget}>
+        {/* <View style={styles.weatherWidget}>
           <Ionicons name="partly-sunny-outline" size={32} color="#FF9800" />
           <Text style={styles.weatherTemp}>35°C</Text>
           <Text style={styles.weatherText}>Ensolarado</Text>
-        </View>
+        </View> */}
       </ScrollView>
     </SafeAreaView>
   );

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, Text, View, ScrollView, Alert, RefreshControl } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import axios from 'axios';
+import { Ionicons } from '@expo/vector-icons';
 import config from '../../config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router';
@@ -59,9 +60,16 @@ export default function MeusPasseios() {
 
                 {servicos.map((servico) => (
                     <View key={servico.servicoId} style={styles.servicoCard}>
-                        <Text style={styles.servicoTitle}>Serviço #{servico.servicoId}</Text>
-                        <Text style={styles.servicoText}>Passeador: {servico.passeador.nome}</Text>
-                        <Text style={styles.servicoText}>Pet: {servico.pet.nome}</Text>
+                        <Text style={styles.servicoTitle}>Passeio</Text>
+                       
+                        <Text style={styles.servicoText}> 
+                            <Ionicons name="walk-sharp" size={14} color="#007AFF" style={styles.optionIcon} />
+                            Walker: {servico.passeador.nome}
+                        </Text>
+                        <Text style={styles.servicoText}>
+                        <Ionicons name="paw-sharp" size={14} color="#007AFF" style={styles.optionIcon} />
+                             Pet:{servico.pet.nome}
+                        </Text>
                         <Text style={styles.servicoText}>Data: {servico.data}</Text>
                         <Text style={styles.servicoText}>Horário: {servico.horario}</Text>
                     </View>
@@ -105,4 +113,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 5,
     },
+    optionIcon: {
+        width: 24,
+      },
 });
