@@ -18,6 +18,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import config from '../../config';
 import getFullImagePath from '../utils/utils';
+import { router } from 'expo-router';
 
 interface Pet {
   petId: string;
@@ -56,6 +57,7 @@ export default function GerenciarPets() {
       Alert.alert('Erro', 'Erro ao buscar pets. Tente novamente.');
     } finally {
       setLoading(false);
+      setRefreshing(false); 
     }
   };
 
@@ -90,19 +92,18 @@ export default function GerenciarPets() {
       </View>
     );
   }
+  const handleCadastroPress = () => {
+      router.push('/principal/cadastro'); 
+  };
 
   return (
     <SafeAreaView style={styles.container} >
-      <ScrollView refreshControl={
-                          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                      }>
         <View style={styles.petsHeader}>
           <Text style={styles.petsTitle}>Meus Pets</Text>
-          <TouchableOpacity style={styles.addPetButton} onPress={() => setModalVisible(true)}>
+          <TouchableOpacity style={styles.addPetButton} onPress={handleCadastroPress}>
             <Ionicons name="add-circle-outline" size={32} color="#007AFF" />
           </TouchableOpacity>
         </View>
-
         <FlatList
           data={pets}
           keyExtractor={(pet) => pet.petId}
@@ -124,6 +125,7 @@ export default function GerenciarPets() {
               </TouchableOpacity>
             );
           }}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         />
 
         <Modal
@@ -170,7 +172,6 @@ export default function GerenciarPets() {
           </View>
         </View>
       </Modal>
-      </ScrollView>
     </SafeAreaView>
   );
 }

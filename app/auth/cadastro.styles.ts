@@ -1,93 +1,149 @@
 import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        padding: 20,
-      },
-      title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        textAlign: 'left',
-        paddingHorizontal: 20,
-        marginTop: 20,
-      },
-      description: {
-        fontSize: 16,
-        color: '#666',
-        textAlign: 'center',
-        marginBottom: 30,
-        paddingHorizontal: 20, 
-      },
-      label: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 5,
-        alignSelf: 'flex-start',
-      },
-      input: {
-        height: 50,
-        width:'100%',
-        backgroundColor: '#f0f0f0', // Cor de fundo sutil
-        borderRadius: 10,
-      
-        paddingHorizontal: 15,
-        marginBottom: 15,
-        fontSize: 16,
-        shadowColor: '#000', // Sombra
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
-        elevation: 2, // Para Android
-      },
-      button: {
-        backgroundColor: '#007AFF',
-        paddingVertical: 15,
-        borderRadius: 10,
-        alignItems: 'center',
-        shadowColor: '#000', 
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 2,
-        elevation: 2, 
-        width:'100%',
-      },
-      buttonText: {
-        color: 'white',
-        fontSize: 18,
-        fontWeight: 'bold',
-        textAlign: 'center',
-      },
-      link: {
-        marginTop: 20,
-        textAlign: 'center',
-        color: 'blue',
-        fontSize: 16,
-      },
-      imagePicker: {
-        backgroundColor: '#e6f7ff',
-        padding: 15,
-        alignItems: 'center',
-        marginBottom: 15,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#b3e0ff',
-    },
-    imagePickerText: {
-        fontSize: 16,
-        color: '#007bff',
-    },
-    imagePreview: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        marginBottom: 20,
-        alignSelf: 'center',
-    },
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 30,
+  },
+  content: {
+    flex: 1,
+    padding: 24,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  header: {
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 8,
+  },
+  description: {
+    fontSize: 16,
+    color: "#666",
+    lineHeight: 22,
+  },
+  progressContainer: {
+    marginBottom: 24,
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: "#E0E0E0",
+    borderRadius: 4,
+    marginBottom: 8,
+    overflow: "hidden",
+  },
+  progressFill: {
+    width: "50%",
+    height: "100%",
+    backgroundColor: "#FF7A00",
+    borderRadius: 4,
+  },
+  progressText: {
+    fontSize: 14,
+    color: "#666",
+  },
+  form: {
+    flex: 1,
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+    marginBottom: 8,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    backgroundColor: "#F8F8F8",
+    height: 56,
+  },
+  inputError: {
+    borderColor: "#FF3B30",
+  },
+  inputIcon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
+    height: "100%",
+  },
+  passwordToggle: {
+    padding: 8,
+  },
+  errorText: {
+    color: "#FF3B30",
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 12,
+  },
+  strengthContainer: {
+    marginTop: 8,
+  },
+  strengthBars: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  strengthBar: {
+    height: 4,
+    borderRadius: 2,
+  },
+  strengthText: {
+    fontSize: 12,
+    textAlign: "right",
+  },
+  button: {
+    height: 56,
+    borderRadius: 12,
+    overflow: "hidden",
+    marginTop: 16,
+  },
+  gradient: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  loginLink: {
+    marginTop: 24,
+    alignItems: "center",
+  },
+  loginLinkText: {
+    fontSize: 14,
+    color: "#666",
+  },
+  loginLinkTextBold: {
+    color: "#FF7A00",
+    fontWeight: "bold",
+  },
     });
 
     export default styles;

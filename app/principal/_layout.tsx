@@ -123,6 +123,7 @@ export default function RootLayout() {
     >
       <Tabs.Screen name="home" />
       <Tabs.Screen name="passeios" />
+      <Tabs.Screen name="gerenciar" /> 
       <Tabs.Screen name="perfil" />
     </Tabs>
   );

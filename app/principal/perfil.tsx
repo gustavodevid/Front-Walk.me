@@ -91,16 +91,6 @@ export default function Perfil() {
             <Text style={styles.profileOptionText}>Configurações</Text>
           </TouchableOpacity> */}
 
-          <TouchableOpacity style={styles.profileOption} onPress={handleGerenciarPets}>
-            <Ionicons name="paw-outline" size={24} color="#007AFF" style={styles.optionIcon} />
-            <Text style={styles.profileOptionText}>Gerenciar Pets</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.profileOption}>
-            <Ionicons name="time-outline" size={24} color="#007AFF" style={styles.optionIcon} />
-            <Text style={styles.profileOptionText}>Histórico de Passeios</Text>
-          </TouchableOpacity>
-
           <TouchableOpacity style={styles.profileOption} onPress={handleLogout}>
                         <Ionicons name="log-out-outline" size={24} color="#FF6347" style={styles.optionIcon} />
                         <Text style={styles.profileOptionText}>Sair</Text>

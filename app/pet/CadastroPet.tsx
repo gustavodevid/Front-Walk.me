@@ -113,13 +113,6 @@ const CadastroPet: React.FC<CadastroPetProps> = ({ onPetCadastrado }) => {
         />
       </View>
 
-      <TouchableOpacity style={styles.imagePicker} onPress={escolherFoto}>
-        <Ionicons name="camera-outline" size={24} color="#007bff" style={styles.imagePickerIcon} />
-        <Text style={styles.imagePickerText}>Selecionar Foto</Text>
-      </TouchableOpacity>
-
-      {foto && <Image source={{ uri: foto }} style={styles.imagePreview} />}
-
       <View style={styles.inputContainer}>
         <Ionicons name="calendar-outline" size={24} color="#007bff" style={styles.inputIcon} />
         <TextInput
@@ -130,6 +123,13 @@ const CadastroPet: React.FC<CadastroPetProps> = ({ onPetCadastrado }) => {
           keyboardType="numeric"
         />
       </View>
+      <TouchableOpacity style={styles.imagePicker} onPress={escolherFoto}>
+        <Ionicons name="camera-outline" size={24} color="#007bff" style={styles.imagePickerIcon} />
+        <Text style={styles.imagePickerText}>Selecionar Foto</Text>
+      </TouchableOpacity>
+
+      {foto && <Image source={{ uri: foto }} style={styles.imagePreview} />}
+
 
       <TouchableOpacity style={styles.button} onPress={cadastrarPet}>
         <Ionicons name="checkmark-circle-outline" size={24} color="white" style={styles.buttonIcon} />
