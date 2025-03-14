@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,10 +8,12 @@ import {
   FlatList,
   Modal,
   Alert,
+  RefreshControl,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import CadastroPet from './CadastroPet'; 
+import CadastroPet from '../pet/CadastroPet'; 
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import config from '../../config';
@@ -32,7 +34,8 @@ export default function GerenciarPets() {
   const [loading, setLoading] = useState(true);
   const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
-
+  const [refreshing, setRefreshing] = useState(false);
+  
   useEffect(() => {
     fetchPets();
   }, []);
@@ -75,6 +78,11 @@ export default function GerenciarPets() {
     }
   };
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchPets();
+    }, [fetchPets]);
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -84,7 +92,10 @@ export default function GerenciarPets() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} >
+      <ScrollView refreshControl={
+                          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                      }>
         <View style={styles.petsHeader}>
           <Text style={styles.petsTitle}>Meus Pets</Text>
           <TouchableOpacity style={styles.addPetButton} onPress={() => setModalVisible(true)}>
@@ -159,6 +170,7 @@ export default function GerenciarPets() {
           </View>
         </View>
       </Modal>
+      </ScrollView>
     </SafeAreaView>
   );
 }

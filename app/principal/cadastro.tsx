@@ -14,12 +14,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import config from '../../config';
 import FormData from 'form-data';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 
 interface CadastroPetProps {
-  onPetCadastrado: () => void; 
 }
 
-const CadastroPet: React.FC<CadastroPetProps> = ({ onPetCadastrado }) => {
+const CadastroPet: React.FC<CadastroPetProps> = () => {
   const [nome, setNome] = useState('');
   const [raca, setRaca] = useState('');
   const [foto, setFoto] = useState<string | null>(null);
@@ -82,7 +82,7 @@ const CadastroPet: React.FC<CadastroPetProps> = ({ onPetCadastrado }) => {
 
         console.log('Pet cadastrado com sucesso:', response.data);
         Alert.alert('Sucesso', 'Pet cadastrado com sucesso!');
-        onPetCadastrado();
+        router.push('/principal/gerenciar')
     } catch (error) {
         console.error('Erro ao cadastrar pet:', error);
         Alert.alert('Erro', 'Erro ao cadastrar pet. Tente novamente.');

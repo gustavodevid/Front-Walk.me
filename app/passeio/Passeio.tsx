@@ -24,6 +24,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Geometry } from 'geojson';
 import getFullImagePath from '../utils/utils';
 import styles from './passeio.styles';
+import { Ionicons } from '@expo/vector-icons';
 interface Passeador {
     passeadorId: string;
     nome: string;
@@ -76,6 +77,14 @@ export default function Passeios() {
       };
       getUserPhoto();
   }, []);
+
+  const handleDateChange = (event: any, selectedDate: Date | undefined) => {
+    if (selectedDate) {
+        console.log(selectedDate);
+        setSelectedDate(selectedDate);
+        setShowDatePicker(false);
+    }
+};
 
     const fetchData = async () => {
           try {
@@ -194,7 +203,6 @@ export default function Passeios() {
       
       try {
         const response = await axios.post(`${config.API_URL}/servico`, servico);
-    
         console.log('Serviço de passeio cadastrado com sucesso:', response.data);
         Alert.alert('Sucesso', 'Serviço de passeio cadastrado com sucesso!');
         router.push('/principal/passeios');
@@ -223,14 +231,6 @@ export default function Passeios() {
         setLoading(false);
       }
     };
-
-    const handleDateChange = (event: any, selectedDate: Date | undefined) => {
-      if (selectedDate) {
-          setDate(selectedDate);
-          setSelectedDate(selectedDate);
-          setShowDatePicker(false);
-      }
-  };
 
 
     return (
@@ -301,26 +301,31 @@ export default function Passeios() {
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
-    <Text>{selectedDate ? selectedDate.toLocaleDateString() : 'Selecione a Data'}</Text>
-</TouchableOpacity>
+                                    <Text>{selectedDate ? selectedDate.toLocaleDateString() : 'Selecione a Data'}</Text>
+                                </TouchableOpacity>
 
-                {showDatePicker && (
-                    <DateTimePicker
-                        testID="dateTimePicker"
-                        value={date}
-                        mode="date"
-                        is24Hour={true}
-                        display="default"
-                        onChange={handleDateChange}
-                    />
-                )}
+                                {showDatePicker && (
+                                    <DateTimePicker
+                                        testID="dateTimePicker"
+                                        value={selectedDate || new Date()} 
+                                        mode="date"
+                                        is24Hour={true}
+                                        display="default"
+                                        onChange={handleDateChange}
+                                    />
+                                )}
 
                                 <TouchableOpacity style={styles.modalButton} onPress={handleProporPasseio}>
-                                    <Text style={styles.modalButtonText}>Propor Passeio</Text>
+                                    <Text style={styles.modalButtonText}>
+                                    Propor Passeio
+                                    <Ionicons name="arrow-redo-sharp" size={14} color="#fff" style={styles.optionIcon} />
+                                        </Text>
                                 </TouchableOpacity>
 
                                 <TouchableOpacity style={styles.modalCloseButton} onPress={() => setSelectedPasseador(null)}>
-                                    <Text style={styles.modalCloseButtonText}>Fechar</Text>
+                                    <Text style={styles.modalCloseButtonText}>
+                                        <Ionicons name="close-sharp" size={14} color="#007AFF" style={styles.optionIcon} />
+                                        </Text>
                                 </TouchableOpacity>
                             </>
                         )}
@@ -332,7 +337,7 @@ export default function Passeios() {
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                     <TouchableOpacity style={styles.closeButton} onPress={() => setShowPetModal(false)}>
-                        <Text style={styles.closeButtonText}>Fechar</Text>
+                        <Text style={styles.closeButtonText}><Ionicons name="close-sharp" size={14} color="#007AFF" style={styles.optionIcon} /></Text>
                     </TouchableOpacity>
                         {pets.map((pet) => (
                             <TouchableOpacity key={pet.petId} style={styles.petItem} onPress={() => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, Text, View, ScrollView, Alert, RefreshControl } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Alert, RefreshControl, TouchableOpacity } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,7 +11,7 @@ interface Servico {
     servicoId: number;
     passeadorId: number;
     petId: number;
-    data: string;
+    dataServico: string;
     horario: string;
     passeador: { nome: string };
     pet: { nome: string };
@@ -42,6 +42,17 @@ export default function MeusPasseios() {
       setRefreshing(false);
   }, []);
 
+  const handleDeleteServico = async (servicoId: number) => {
+    try {
+        await axios.delete(`${config.API_URL}/servico/${servicoId}`);
+        Alert.alert('Sucesso', 'Serviço excluído com sucesso.');
+        fetchServicos(); 
+    } catch (error) {
+        console.error('Erro ao excluir serviço:', error);
+        Alert.alert('Erro', 'Erro ao excluir serviço.');
+    }
+};
+
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     fetchServicos();
@@ -50,6 +61,14 @@ export default function MeusPasseios() {
   useEffect(() => {
       fetchServicos();
   }, [fetchServicos]);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+};
 
     return (
         <SafeAreaView style={styles.container}>
@@ -70,8 +89,10 @@ export default function MeusPasseios() {
                         <Ionicons name="paw-sharp" size={14} color="#007AFF" style={styles.optionIcon} />
                              Pet:{servico.pet.nome}
                         </Text>
-                        <Text style={styles.servicoText}>Data: {servico.data}</Text>
-                        <Text style={styles.servicoText}>Horário: {servico.horario}</Text>
+                        <Text style={styles.servicoText}>Data: {formatDate(servico.dataServico)}</Text>
+                        <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteServico(servico.servicoId)}>
+                            <Ionicons name="trash-bin-outline" size={24} color="white" />
+                        </TouchableOpacity>
                     </View>
                 ))}
             </ScrollView>
@@ -116,4 +137,10 @@ const styles = StyleSheet.create({
     optionIcon: {
         width: 24,
       },
+      deleteButton: {
+        backgroundColor: 'red',
+        padding: 10,
+        borderRadius: 5,
+        alignSelf: 'flex-end',
+    },
 });

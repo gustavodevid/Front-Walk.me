@@ -14,6 +14,9 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
       marginBottom: 20,
     },
+    optionIcon: {
+      width: 24,
+    },
     passeioText: {
       fontSize: 16,
       marginBottom: 5,

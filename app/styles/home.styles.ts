@@ -85,6 +85,8 @@ const styles = StyleSheet.create({
       height: 80,
       borderRadius: 40,
       marginBottom: 5,
+      borderWidth: 2, 
+      borderColor: '#eee',
     },
     passeadorNome: {
       fontSize: 16,

@@ -163,15 +163,15 @@ if (loading) {
                     <Text style={styles.searchText}>Buscar Passeio</Text>
                 </TouchableOpacity>
         {/* Feed de Atividades */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Lembrete</Text>
+        {/* <View style={styles.section}>
           {servicos.map((servico) => (
-                              <View key={servico.servicoId} style={styles.servicoCard}>
+            <View key={servico.servicoId} style={styles.servicoCard}>
+                                <Text style={styles.sectionTitle}>Lembrete</Text>
                                   <Text style={styles.servicoTitle}>Passeio </Text>
-                                  <Text style={styles.servicoText}>Você tem um passeio agendado com {servico.passeador.nome} para {servico.pet.nome}.</Text>
+                                  <Text style={styles.servicoText}>Você tem um passeio agendado com {servico.passeador.nome} para {servico.pet.nome}</Text>
                               </View>
                           ))}
-        </View>
+        </View> */}
         
          {/* Recomendações de Passeadores */}
          <View style={styles.section}>
