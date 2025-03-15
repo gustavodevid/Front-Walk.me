@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+"use client"
+
+import { useCallback, useEffect, useState, useRef } from "react"
 import {
   StyleSheet,
   Text,
@@ -9,273 +11,436 @@ import {
   Modal,
   Alert,
   RefreshControl,
-  ScrollView,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import CadastroPet from '../pet/CadastroPet'; 
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import config from '../../config';
-import getFullImagePath from '../utils/utils';
-import { router } from 'expo-router';
+  ActivityIndicator,
+  Animated,
+  Dimensions,
+  StatusBar,
+  Platform,
+} from "react-native"
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
+import { LinearGradient } from "expo-linear-gradient"
+import axios from "axios"
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import { router, useFocusEffect } from "expo-router"
+import config from "../../config"
+import getFullImagePath from "../utils/utils"
+import styles from "../styles/gerenciarpet.styles"
 
 interface Pet {
-  petId: string;
-  nome: string;
-  raca: string;
-  idade: number;
-  tutorId: string;
-  foto?: string | null;
+  petId: string
+  nome: string
+  raca: string
+  idade: number
+  peso?: number
+  observacoes?: string
+  tutorId: string
+  foto?: string | null
 }
 
 export default function GerenciarPets() {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [pets, setPets] = useState<Pet[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
-  const [optionsModalVisible, setOptionsModalVisible] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  
-  useEffect(() => {
-    fetchPets();
-  }, []);
+  // Refs & Hooks
+  const insets = useSafeAreaInsets()
+  const fadeAnim = useRef(new Animated.Value(0)).current
+  const scaleAnim = useRef(new Animated.Value(0.95)).current
+  const screenWidth = Dimensions.get("window").width
 
+  // State
+  const [pets, setPets] = useState<Pet[]>([])
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [selectedPet, setSelectedPet] = useState<Pet | null>(null)
+  const [optionsModalVisible, setOptionsModalVisible] = useState(false)
+  const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false)
+  const [petDetailsVisible, setPetDetailsVisible] = useState(false)
+
+  // Constants
+  const defaultImage = require("../../assets/images/cao-login.jpg")
+
+  // Effects
+  useEffect(() => {
+    StatusBar.setBarStyle("dark-content")
+    if (Platform.OS === "android") {
+      StatusBar.setBackgroundColor("transparent")
+      StatusBar.setTranslucent(true)
+    }
+
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+    ]).start()
+  }, [])
+
+  // Refresh pets list when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchPets()
+      return () => {}
+    }, []),
+  )
+
+  // Data fetching
   const fetchPets = async () => {
     try {
-      setLoading(true);
-      const userId = await AsyncStorage.getItem('userId');
-    
-      if (!userId) {
-        Alert.alert('Erro', 'Usuário não autenticado.');
-        return;
-      }
-      const response = await axios.get(`${config.API_URL}/pet/tutor/${userId}`);
-      setPets(response.data);
-    } catch (error) {
-      console.error('Erro ao buscar pets:', error);
-      Alert.alert('Erro', 'Erro ao buscar pets. Tente novamente.');
-    } finally {
-      setLoading(false);
-      setRefreshing(false); 
-    }
-  };
+      setLoading(true)
+      const userId = await AsyncStorage.getItem("userId")
 
-  const handlePetCadastrado = () => {
-    setModalVisible(false);
-    fetchPets(); 
-  };
+      if (!userId) {
+        Alert.alert("Erro", "Usuário não autenticado.")
+        return
+      }
+
+      const response = await axios.get(`${config.API_URL}/pet/tutor/${userId}`)
+      setPets(response.data)
+    } catch (error) {
+      console.error("Erro ao buscar pets:", error)
+      Alert.alert("Erro de Conexão", "Não foi possível carregar seus pets. Verifique sua conexão e tente novamente.")
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }
+
+  // Event handlers
+  const onRefresh = useCallback(() => {
+    setRefreshing(true)
+    fetchPets()
+  }, [])
+
+  const handleAddPet = () => {
+    router.push("/principal/cadastro")
+  }
+
+  const handlePetPress = (pet: Pet) => {
+    setSelectedPet(pet)
+    setPetDetailsVisible(true)
+  }
+
+  const handlePetOptions = (pet: Pet) => {
+    setSelectedPet(pet)
+    setOptionsModalVisible(true)
+  }
 
   const handleDeletePet = async () => {
-    if (!selectedPet) return;
+    if (!selectedPet) return
+
+    setConfirmDeleteVisible(false)
+    setOptionsModalVisible(false)
+    setLoading(true)
 
     try {
-      await axios.delete(`${config.API_URL}/pet/${selectedPet.petId}`);
-      Alert.alert('Sucesso', 'Pet excluído com sucesso!');
-      setOptionsModalVisible(false);
-      fetchPets();
+      await axios.delete(`${config.API_URL}/pet/${selectedPet.petId}`)
+
+      // Update local state for immediate feedback
+      setPets((prevPets) => prevPets.filter((p) => p.petId !== selectedPet.petId))
+
+      Alert.alert("Sucesso", `${selectedPet.nome} foi removido com sucesso!`)
     } catch (error) {
-      console.error('Erro ao excluir pet:', error);
-      Alert.alert('Erro', 'Erro ao excluir pet. Tente novamente.');
+      console.error("Erro ao excluir pet:", error)
+      Alert.alert("Erro", "Não foi possível excluir o pet. Tente novamente.")
+    } finally {
+      setLoading(false)
     }
-  };
+  }
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchPets();
-    }, [fetchPets]);
+  const handleEditPet = () => {
+    if (!selectedPet) return
 
-  if (loading) {
+    setOptionsModalVisible(false)
+    // Navigate to edit pet screen with pet data
+    // router.push({
+    //   pathname: "/pet/editar",
+    //   params: { id: selectedPet.petId },
+    // })
+  }
+
+  // Render functions
+  const renderPetItem = ({ item: pet, index }: { item: Pet; index: number }) => {
+    const fotoUri = pet.foto?.trim()
+    const animationDelay = index * 100
+
+    // Calculate pet age text
+    const ageText = pet.idade === 1 ? "1 ano" : `${pet.idade} anos`
+
+    return (
+      <Animated.View
+        style={[
+          styles.petCardContainer,
+          {
+            opacity: fadeAnim,
+            transform: [{ scale: scaleAnim }],
+            width: screenWidth - 32,
+          },
+        ]}
+      >
+        <TouchableOpacity style={styles.petCard} onPress={() => handlePetPress(pet)} activeOpacity={0.8}>
+          <View style={styles.petImageContainer}>
+            <Image
+              style={styles.petImage}
+              source={fotoUri ? { uri: getFullImagePath(fotoUri) } : defaultImage}
+              onError={() => console.log(`Erro ao carregar imagem ${pet.nome}`)}
+            />
+          </View>
+
+          <View style={styles.petInfo}>
+            <Text style={styles.petNome}>{pet.nome}</Text>
+            <Text style={styles.petRaca}>{pet.raca}</Text>
+            <Text style={styles.petIdade}>{ageText}</Text>
+          </View>
+
+          <TouchableOpacity style={styles.optionsButton} onPress={() => handlePetOptions(pet)}>
+            <Ionicons name="ellipsis-vertical" size={20} color="#666" />
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Animated.View>
+    )
+  }
+
+  const renderEmptyList = () => (
+    <View style={styles.emptyContainer}>
+      <MaterialCommunityIcons name="dog" size={80} color="#DDD" />
+      <Text style={styles.emptyTitle}>Nenhum pet cadastrado</Text>
+      <Text style={styles.emptyText}>Cadastre seu primeiro pet para começar a usar o aplicativo.</Text>
+      <TouchableOpacity style={styles.emptyButton} onPress={handleAddPet}>
+        <LinearGradient
+          colors={["#FF9A3D", "#FF7A00"]}
+          style={styles.emptyButtonGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        >
+          <Text style={styles.emptyButtonText}>Cadastrar Pet</Text>
+        </LinearGradient>
+      </TouchableOpacity>
+    </View>
+  )
+
+  // Loading state
+  if (loading && !refreshing) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Carregando pets...</Text>
+        <ActivityIndicator size="large" color="#FF7A00" />
+        <Text style={styles.loadingText}>Carregando seus pets...</Text>
       </View>
-    );
+    )
   }
-  const handleCadastroPress = () => {
-      router.push('/principal/cadastro'); 
-  };
 
   return (
-    <SafeAreaView style={styles.container} >
-        <View style={styles.petsHeader}>
-          <Text style={styles.petsTitle}>Meus Pets</Text>
-          <TouchableOpacity style={styles.addPetButton} onPress={handleCadastroPress}>
-            <Ionicons name="add-circle-outline" size={32} color="#007AFF" />
-          </TouchableOpacity>
-        </View>
-        <FlatList
-          data={pets}
-          keyExtractor={(pet) => pet.petId}
-          renderItem={({ item: pet }) => {
-            const fotoUri = pet.foto?.trim();
-            console.log(`Carregando imagem do pet ${pet.nome}:`, fotoUri);
-            
-            return (
-              <TouchableOpacity onPress={() => { setSelectedPet(pet); setOptionsModalVisible(true); }}>
-              <View style={styles.petCard}>
-                <Image
-                  style={styles.petImage}
-                  source={fotoUri ? { uri: getFullImagePath(fotoUri) } : require('../../assets/images/cao-login.jpg')
-                  }
-                  onError={(error) => console.log(`Erro ao carregar imagem ${pet.nome}:`, error.nativeEvent)}
-                />
-                <Text style={styles.petNome}>{pet.nome}</Text>
-              </View>
-              </TouchableOpacity>
-            );
-          }}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        />
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+      {/* Header */}
+      <View style={[styles.header, { paddingTop: insets.top > 0 ? 0 : 16 }]}>
+        <Text style={styles.title}>Meus Pets</Text>
+        <TouchableOpacity style={styles.addButton} onPress={handleAddPet}>
+          <LinearGradient
+            colors={["#FF9A3D", "#FF7A00"]}
+            style={styles.addButtonGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          >
+            <Ionicons name="add" size={24} color="#FFF" />
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
 
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <CadastroPet onPetCadastrado={handlePetCadastrado} />
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.closeButtonText}><Ionicons name="close-sharp" size={14} color="#fff"/></Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
+      {/* Pets List */}
+      <FlatList
+        data={pets}
+        keyExtractor={(pet) => pet.petId}
+        renderItem={renderPetItem}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#FF7A00"]} tintColor="#FF7A00" />
+        }
+        ListEmptyComponent={renderEmptyList}
+      />
 
-        <Modal
-        animationType="slide"
+      {/* Pet Options Modal */}
+      <Modal
+        animationType="fade"
         transparent={true}
         visible={optionsModalVisible}
         onRequestClose={() => setOptionsModalVisible(false)}
       >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setOptionsModalVisible(false)}>
+          <View style={styles.optionsModalContainer}>
+            <View style={styles.optionsModal}>
+              {selectedPet && (
+                <>
+                  <View style={styles.optionsHeader}>
+                    <Text style={styles.optionsTitle}>Opções</Text>
+                    <TouchableOpacity style={styles.closeButton} onPress={() => setOptionsModalVisible(false)}>
+                      <Ionicons name="close" size={24} color="#666" />
+                    </TouchableOpacity>
+                  </View>
+
+                  <TouchableOpacity style={styles.optionItem} onPress={handleEditPet}>
+                    <Ionicons name="create-outline" size={24} color="#2196F3" />
+                    <Text style={styles.optionText}>Editar informações</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.optionItem}
+                    onPress={() => {
+                      setOptionsModalVisible(false)
+                      setConfirmDeleteVisible(true)
+                    }}
+                  >
+                    <Ionicons name="trash-outline" size={24} color="#F44336" />
+                    <Text style={[styles.optionText, { color: "#F44336" }]}>Remover pet</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Confirm Delete Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={confirmDeleteVisible}
+        onRequestClose={() => setConfirmDeleteVisible(false)}
+      >
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setConfirmDeleteVisible(false)}>
+          <View style={styles.confirmModalContainer}>
+            <View style={styles.confirmModal}>
+              {selectedPet && (
+                <>
+                  <Text style={styles.confirmTitle}>Remover Pet</Text>
+                  <Text style={styles.confirmText}>
+                    Tem certeza que deseja remover {selectedPet.nome}? Esta ação não pode ser desfeita.
+                  </Text>
+
+                  <View style={styles.confirmButtons}>
+                    <TouchableOpacity
+                      style={[styles.confirmButton, styles.cancelButton]}
+                      onPress={() => setConfirmDeleteVisible(false)}
+                    >
+                      <Text style={styles.cancelButtonText}>Cancelar</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={[styles.confirmButton, styles.deleteButton]} onPress={handleDeletePet}>
+                      <Text style={styles.deleteButtonText}>Remover</Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              )}
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Pet Details Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={petDetailsVisible}
+        onRequestClose={() => setPetDetailsVisible(false)}
+      >
+        <View style={styles.detailsModalOverlay}>
+          <View style={styles.detailsModalContainer}>
             {selectedPet && (
               <>
-                <Text style={styles.modalTitle}>{selectedPet.nome}</Text>
-                <TouchableOpacity style={styles.optionButton} onPress={handleDeletePet}>
-                  <Text style={styles.optionButtonText}>Excluir Pet</Text>
+                <TouchableOpacity style={styles.detailsCloseButton} onPress={() => setPetDetailsVisible(false)}>
+                  <Ionicons name="close" size={24} color="#FFF" />
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => setOptionsModalVisible(false)}
-                >
-                  <Text style={styles.closeButtonText}><Ionicons name="close-sharp" size={14} color="#fff"  /></Text>
-                </TouchableOpacity>
+
+                <View style={styles.petDetailsHeader}>
+                  <Image
+                    style={styles.petDetailsImage}
+                    source={selectedPet.foto ? { uri: getFullImagePath(selectedPet.foto) } : defaultImage}
+                  />
+                  <LinearGradient colors={["transparent", "rgba(0,0,0,0.7)"]} style={styles.petDetailsGradient}>
+                    <Text style={styles.petDetailsName}>{selectedPet.nome}</Text>
+                  </LinearGradient>
+                </View>
+
+                <View style={styles.petDetailsContent}>
+                  <View style={styles.petDetailItem}>
+                    <View style={styles.petDetailIconContainer}>
+                      <Ionicons name="paw" size={20} color="#FF7A00" />
+                    </View>
+                    <View>
+                      <Text style={styles.petDetailLabel}>Raça</Text>
+                      <Text style={styles.petDetailValue}>{selectedPet.raca}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.petDetailItem}>
+                    <View style={styles.petDetailIconContainer}>
+                      <Ionicons name="calendar" size={20} color="#FF7A00" />
+                    </View>
+                    <View>
+                      <Text style={styles.petDetailLabel}>Idade</Text>
+                      <Text style={styles.petDetailValue}>
+                        {selectedPet.idade === 1 ? "1 ano" : `${selectedPet.idade} anos`}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {selectedPet.peso && (
+                    <View style={styles.petDetailItem}>
+                      <View style={styles.petDetailIconContainer}>
+                        <Ionicons name="scale" size={20} color="#FF7A00" />
+                      </View>
+                      <View>
+                        <Text style={styles.petDetailLabel}>Peso</Text>
+                        <Text style={styles.petDetailValue}>{selectedPet.peso} kg</Text>
+                      </View>
+                    </View>
+                  )}
+
+                  {selectedPet.observacoes && (
+                    <View style={styles.petObservacoes}>
+                      <Text style={styles.petObservacoesLabel}>Observações</Text>
+                      <Text style={styles.petObservacoesText}>{selectedPet.observacoes}</Text>
+                    </View>
+                  )}
+
+                  <View style={styles.petDetailsActions}>
+                    <TouchableOpacity
+                      style={styles.petDetailsAction}
+                      onPress={() => {
+                        setPetDetailsVisible(false)
+                        handlePetOptions(selectedPet)
+                      }}
+                    >
+                      <Ionicons name="settings-outline" size={20} color="#666" />
+                      <Text style={styles.petDetailsActionText}>Opções</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={styles.petDetailsAction}
+                      onPress={() => {
+                        setPetDetailsVisible(false)
+                        // Navigate to schedule screen with pet ID
+                        router.push({
+                          pathname: "/passeio/Passeio",
+                          params: { petId: selectedPet.petId },
+                        })
+                      }}
+                    >
+                      <Ionicons name="calendar-outline" size={20} color="#4CAF50" />
+                      <Text style={[styles.petDetailsActionText, { color: "#4CAF50" }]}>Agendar Passeio</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </>
             )}
           </View>
         </View>
       </Modal>
     </SafeAreaView>
-  );
+  )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  petsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  petsTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  addPetButton: {
-    padding: 10,
-  },
-  petCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 18,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: 'white',
-    borderRadius: 10,
-    marginHorizontal: 10,
-    marginVertical: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  petImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    marginRight: 18,
-  },
-  petNome: {
-    fontSize: 18,
-    color: '#333',
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    width: '90%',
-  },
-  closeButton: {
-    backgroundColor: '#2196F3',
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-    marginTop: 15,
-  },
-  closeButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  optionButton: {
-    backgroundColor: '#FF6347',
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-    marginBottom: 10,
-  },
-  optionButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-});
+

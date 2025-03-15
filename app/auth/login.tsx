@@ -20,6 +20,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
 import loginTutor from "../services/api/auth/LoginTutor"
 import { storeData } from "../utils/Storage/StoreData"
+import styles from "./login.styles"
 
 export default function Login() {
   const router = useRouter()

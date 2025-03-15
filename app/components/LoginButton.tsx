@@ -20,7 +20,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ onPress, loading }) => {
 
 const styles = StyleSheet.create({
     button: {
-        backgroundColor: '#007AFF',
+        backgroundColor: '#FF7A00',
         paddingVertical: 12,
         paddingHorizontal: 20,
         borderRadius: 8,
